@@ -1,0 +1,21 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Divar Webservice Documentation",
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/check-version": {
+            "get": {
+                "summary": "Get a success mesaage!",
+                "description": "Return a success json to check api docs.",
+                "operationId": "8d0219c9fa0c3d6963937985d0628fc2",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
