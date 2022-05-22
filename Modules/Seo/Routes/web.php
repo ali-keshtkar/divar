@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +11,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    dd(auth()->user());
-})->middleware('auth:web');
+Route::prefix('seo')->group(function() {
+    Route::get('/', 'SeoController@index');
+});

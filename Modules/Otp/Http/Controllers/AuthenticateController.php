@@ -10,40 +10,44 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Session;
 use Modules\Otp\Entities\Otp;
+use Modules\Seo\Http\Traits\HasSeo;
+use Modules\User\Entities\User;
 
 class AuthenticateController extends Controller
 {
+    #region Traits
+
+    use HasSeo;
+
+    #endregion
+
     #region Pages
 
     /**
-     * Show login form to unauthenticated user.
+     * Show login page to unauthenticated user.
      *
      * @return Application|Factory|View
      */
     public function loginPage()
     {
-        SEOTools::setTitle("salam")
-            ->setDescription("des")
-            ->twitter()
-            ->setTitle("");
-        return view('otp::login');
+        $this->initSeo('otp', 'login')->_generateSeoPage();
+        return view(Lang::get('otp::page.login.view'));
     }
 
     /**
-     * Show confirm form to unauthenticated user.
+     * Show confirm page to unauthenticated user.
      *
      * @return Application|Factory|View
      */
     public function confirmPage()
     {
-        SEOTools::setTitle("salam")
-            ->setDescription("des")
-            ->twitter()
-            ->setTitle("");
+        $this->initSeo('otp', 'confirm')->_generateSeoPage();
         Session::reflash();
-        return view('otp::confirm');
+        return view(Lang::get('otp::page.confirm.view'));
     }
 
     #endregion
@@ -51,7 +55,7 @@ class AuthenticateController extends Controller
     #region Actions
 
     /**
-     * Receive a phone number and generate a unique random code.
+     * Receive a phone number and generate new Otp.
      *
      * @param Request $request
      * @return RedirectResponse
@@ -65,6 +69,13 @@ class AuthenticateController extends Controller
         return redirect()->route('otp.authenticate.page.confirm.get.web')->with(['phone_number' => $otp->phone_number]);
     }
 
+    /**
+     * Receive a phone number and otp code then validation data
+     * If data was valid create a user and login it otherwise shows error to user.
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
     public function confirmOtp(Request $request)
     {
         Session::reflash();
@@ -75,12 +86,15 @@ class AuthenticateController extends Controller
         $otp = Otp::query()->where(['phone_number' => $request->get('phone_number')])->first();
         if ($otp) {
             if ($otp->code == $request->get('otp_code')) {
-                dd("Hello user :)");
-            } else {
-                return redirect()->back()->withErrors(['otp_code' => "code.invalid"]);
+                /** @var User $user */
+                $user = User::query()->firstOrCreate(['phone_number' => $otp->phone_number], ['phone_number' => $otp->phone_number]);
+                $otp->delete();
+                Auth::login($user);
+                return redirect('/');
             }
+            return redirect()->back()->withErrors(['otp_code' => "code.invalid"]);
         }
-        return redirect()->back()->withErrors(['otp_code' => "phone number not exists"]);
+        return redirect()->back()->withErrors(['otp_code' => "request invalid"]);
     }
 
     #endregion

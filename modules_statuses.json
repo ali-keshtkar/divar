@@ -1,4 +1,6 @@
 {
     "Otp": true,
-    "Core": true
+    "Core": true,
+    "User": true,
+    "Seo": true
 }

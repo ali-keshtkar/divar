@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
+use Modules\Otp\Http\Controllers\Api\V1\ApiAuthenticateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/otp', function (Request $request) {
-    return $request->user();
+Route::prefix('v1')->group(function (Router $router){
+    $router->post('login', [ApiAuthenticateController::class, 'requestOtp'])
+        ->name('otp.api-authenticate.request-otp.post.api');
+    $router->post('confirm', [ApiAuthenticateController::class, 'confirmOtp'])
+        ->name('otp.api-authenticate.confirm-otp.post.api');
 });
